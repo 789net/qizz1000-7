@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff7f00">
+    <title>Історичний квіз</title>
+    <style>
+        :root {
+            --primary: #ff7f00;
+            --primary-dark: #e67300;
+            --dark: #1a1a1a;
+            --darker: #111;
+            --gray: #333;
+            --light: #f5f5f5;
+            --correct: #4CAF50;
+            --incorrect: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,127,0,0.1) 0%, rgba(0,0,0,0) 20%);
+        }
+
+        .light-mode {
+            background-color: var(--light);
+            color: var(--dark);
+            background-image: radial-gradient(circle at 90% 80%, rgba(255,127,0,0.05) 0%, rgba(0,0,0,0) 30%);
+        }
+
+        /* Главное меню */
+        .main-menu {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 3.5rem;
+        }
+
+        .menu-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            color: rgba(255,255,255,0.7);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .light-mode .menu-subtitle {
+            color: rgba(0,0,0,0.7);
+        }
+
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .menu-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .menu-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+
+        .menu-btn i {
+            font-size: 1.3rem;
+        }
+
+        .menu-footer {
+            margin-top: 3rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        .light-mode .menu-footer {
+            color: rgba(0,0,0,0.5);
+        }
+
+        /* Контейнер квиза */
+        .quiz-container {
+            background-color: var(--gray);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            position: relative;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #timer {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        #progress-bar {
+            height: 10px;
+            background-color: var(--primary);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #quiz {
+            margin: 20px 0;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option {
+            background-color: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            background-color: rgba(255,127,0,0.2);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--gray);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        #theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        #leaderboard-btn {
+            background-color: var(--correct);
+        }
+
+        .feedback-correct {
+            color: var(--correct);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feedback-incorrect {
+            color: var(--incorrect);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .correct-answer {
+            background-color: rgba(76, 175, 80, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--correct);
+        }
+
+        .explanation {
+            font-style: italic;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .light-mode .explanation {
+            color: rgba(0,0,0,0.8);
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .logo-icon {
+                font-size: 2.2rem;
+            }
+            
+            .menu-subtitle {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+            
+            .main-menu, .quiz-container {
+                padding: 1.5rem;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            #navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Главное меню -->
+    <div class="main-menu" id="mainMenu">
+        <div class="logo">
+            <span class="logo-icon">🧠</span>
+            <span>Історія</span>
+        </div>
+        <p class="menu-subtitle">Перевірте свої знання історії у цьому захопливому квізі з 10 питаннями на час!</p>
+        
+        <div class="menu-options">
+            <button class="menu-btn" id="startGameBtn">
+                <i class="fas fa-play"></i> Почати гру
+            </button>
+            <button class="menu-btn" id="leaderboardMenuBtn">
+                <i class="fas fa-trophy"></i> Таблиця лідерів
+            </button>
+            <button class="menu-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i> Налаштування
+            </button>
+        </div>
+        
+        <p class="menu-footer"></p>
+    </div>
+
+    <!-- Контейнер квиза -->
+    <div class="quiz-container" id="quizContainer">
+        <h1>Історичний квіз</h1>
+        <div id="timer">Час: <span id="time">02:30</span></div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="quiz"></div>
+        <div id="navigation">
+            <button id="prev-btn" disabled>Назад</button>
+            <button id="next-btn">Далі</button>
+        </div>
+        <button id="returnToMenuBtn" style="display: none; margin-top: 20px;">
+            <i class="fas fa-arrow-left"></i> Повернутися в меню
+        </button>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-modal">&times;</span>
+            <h2>Ваш результат</h2>
+            <p id="modal-message"></p>
+            <p id="score-message"></p>
+            <div class="action-buttons">
+                <button id="leaderboard-btn">Таблиця лідерів</button>
+            </div>
+            <button id="restart-btn">Спробувати ще</button>
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <div id="feedback-emoji" class="emoji"></div>
+            <h3 id="feedback-title"></h3>
+            <div id="feedback-content"></div>
+            <button id="continue-btn">Продовжити</button>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content">
+            <h2>Таблиця лідерів</h2>
+            <div id="leaderboard"></div>
+            <button id="close-leaderboard">Закрити</button>
+        </div>
+    </div>
+
+    <button id="theme-toggle">🌓</button>
+
+    <script>
+        // Дані питань (10 питань)
+        const questions = [
+            {
+                question: "Хто був першим президентом США?",
+                options: ["Джордж Вашингтон", "Томас Джефферсон", "Абрахам Лінкольн", "Теодор Рузвельт"],
+                answer: 0,
+                explanation: "Джордж Вашингтон став першим президентом США у 1789 році."
+            },
+            {
+                question: "Коли почалася Друга світова війна?",
+                options: ["1914", "1939", "1941", "1945"],
+                answer: 1,
+                explanation: "Друга світова війна почалася 1 вересня 1939 року нападом Німеччини на Польщу."
+            },
+            {
+                question: "Хто написав 'Державець'?",
+                options: ["Ніколо Макіавеллі", "Марка Аврелія", "Платон", "Аристотель"],
+                answer: 0,
+                explanation: "Ніколо Макіавеллі написав 'Державець' у 1513 році."
+            },
+            {
+                question: "Яка країна була центром Римської імперії?",
+                options: ["Греція", "Італія", "Єгипет", "Туреччина"],
+                answer: 1,
+                explanation: "Римська імперія мала свій центр в Італії, зі столицею в Римі."
+            },
+            {
+                question: "Коли був побудований Великий китайський мур?",
+                options: ["15 століття до н.е.", "5 століття до н.е.", "3 століття до н.е.", "1 століття н.е."],
+                answer: 2,
+                explanation: "Будівництво почалося в 3 столітті до н.е. за часів династії Цінь."
+            },
+            {
+                question: "Яка цивілізація побудувала піраміди в Гізі?",
+                options: ["Шумерська", "Ассирійська", "Вавилонська", "Староєгипетська"],
+                answer: 3,
+                explanation: "Піраміди в Гізі були побудовані в Стародавньому Єгипті."
+            },
+            {
+                question: "Хто був першим правителем об'єднаної Русі?",
+                options: ["Рюрик", "Олег", "Ігор", "Володимир Великий"],
+                answer: 1,
+                explanation: "Князь Олег об'єднав північні та південні землі Русі з центром у Києві."
+            },
+            {
+                question: "У якому році відбулася Хрещенська революція в Англії?",
+                options: ["1642", "1688", "1707", "1776"],
+                answer: 1,
+                explanation: "Хрещенська революція (Славна революція) відбулася в 1688 році."
+            },
+            {
+                question: "Яка битва була переломною у Другій світовій війні?",
+                options: ["Битва за Британію", "Сталінградська битва", "Битва за Берлін", "Курська битва"],
+                answer: 3,
+                explanation: "Курська битва (1943 р.) була переломним моментом на Східному фронті."
+            },
+            {
+                question: "Хто був автором 'Капіталу'?",
+                options: ["Фрідріх Енгельс", "Карл Маркс", "Володимир Ленін", "Адам Сміт"],
+                answer: 1,
+                explanation: "Карл Маркс написав 'Капітал' - фундаментальну працю з політичної економії."
+            }
+        ];
+
+        // Змінні стану
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 150; // 2 хвилини 30 секунд
+        let timer;
+        let userAnswers = Array(questions.length).fill(null);
+        let darkMode = false;
+
+        // DOM елементи
+        const quizContainer = document.getElementById('quizContainer');
+        const mainMenu = document.getElementById('mainMenu');
+        let timerElement = document.getElementById('time');
+        const progressBar = document.getElementById('progress-bar');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const returnToMenuBtn = document.getElementById('returnToMenuBtn');
+        const leaderboardMenuBtn = document.getElementById('leaderboardMenuBtn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultModal = document.getElementById('resultModal');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const leaderboardModal = document.getElementById('leaderboardModal');
+        const themeToggle = document.getElementById('theme-toggle');
+        const feedbackEmoji = document.getElementById('feedback-emoji');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackContent = document.getElementById('feedback-content');
+
+        // Ініціалізація
+        document.addEventListener('DOMContentLoaded', () => {
+            startGameBtn.addEventListener('click', startGame);
+            returnToMenuBtn.addEventListener('click', returnToMenu);
+            leaderboardMenuBtn.addEventListener('click', showLeaderboard);
+            prevBtn.addEventListener('click', prevQuestion);
+            nextBtn.addEventListener('click', nextQuestion);
+            document.getElementById('continue-btn').addEventListener('click', continueQuiz);
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+            document.getElementById('leaderboard-btn').addEventListener('click', showLeaderboard);
+            document.getElementById('close-leaderboard').addEventListener('click', closeLeaderboard);
+            document.getElementById('close-modal').addEventListener('click', () => resultModal.style.display = 'none');
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // Перевіряємо збережену тему
+            if (localStorage.getItem('darkMode') === 'true') {
+                toggleTheme();
+            }
+        });
+
+        // Початок гри з меню
+        function startGame() {
+            mainMenu.style.display = 'none';
+            quizContainer.style.display = 'block';
+            returnToMenuBtn.style.display = 'block';
+            startQuiz();
+        }
+
+        // Повернення в меню
+        function returnToMenu() {
+            quizContainer.style.display = 'none';
+            mainMenu.style.display = 'block';
+            clearInterval(timer);
+        }
+
+        // Початок квізу
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            timeLeft = 150;
+            userAnswers = Array(questions.length).fill(null);
+            
+            // Скидаємо таймер
+            updateTimerDisplay();
+            startTimer();
+            loadQuestion();
+        }
+
+        // Завантаження питання
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            
+            // Оновлюємо прогрес бар
+            progressBar.style.width = `${(currentQuestion / questions.length) * 100}%`;
+            
+            // Оновлюємо кнопки навігації
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Завершити' : 'Далі';
+            
+            // Відображаємо питання
+            quizContainer.innerHTML = `
+                <h1>Історичний квіз</h1>
+                <div id="timer">Час: <span id="time">02:30</span></div>
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <div id="quiz">
+                    <div class="question">${question.question}</div>
+                    <ul class="options">
+                        ${question.options.map((option, index) => `
+                            <li class="option ${userAnswers[currentQuestion] === index ? 'selected' : ''}" 
+                                data-index="${index}">
+                                ${option}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div id="navigation">
+                    <button id="prev-btn" ${currentQuestion === 0 ? 'disabled' : ''}>Назад</button>
+                    <button id="next-btn">${currentQuestion === questions.length - 1 ? 'Завершити' : 'Далі'}</button>
+                </div>
+                <button id="returnToMenuBtn" style="margin-top: 20px;">
+                    <i class="fas fa-arrow-left"></i> Повернутися в меню
+                </button>
+            `;
+            
+            // Оновлюємо timerElement після вставки нового DOM
+            timerElement = document.getElementById('time');
+            
+            // Додаємо обробники подій для варіантів відповідей
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', selectAnswer);
+            });
+            
+            // Повторно додаємо обробники подій для кнопок
+            document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+            document.getElementById('next-btn').addEventListener('click', nextQuestion);
+            document.getElementById('returnToMenuBtn').addEventListener('click', returnToMenu);
+        }
+
+        // Вибір відповіді
+        function selectAnswer(e) {
+            const selectedIndex = parseInt(e.target.getAttribute('data-index'));
+            userAnswers[currentQuestion] = selectedIndex;
+            
+            // Підсвічуємо вибрану відповідь
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            e.target.classList.add('selected');
+        }
+
+        // Наступне питання
+        function nextQuestion() {
+            if (userAnswers[currentQuestion] === null) {
+                alert('Будь ласка, оберіть відповідь!');
+                return;
+            }
+            
+            // Перевіряємо відповідь
+            const isCorrect = userAnswers[currentQuestion] === questions[currentQuestion].answer;
+            if (isCorrect) score++;
+            
+            // Показуємо зворотний зв'язок
+            showFeedback(isCorrect);
+        }
+
+        // Попереднє питання
+        function prevQuestion() {
+            currentQuestion--;
+            loadQuestion();
+        }
+
+        // Показати зворотний зв'язок
+        function showFeedback(isCorrect) {
+            const question = questions[currentQuestion];
+            
+            if (isCorrect) {
+                feedbackEmoji.textContent = '🎉';
+                feedbackTitle.innerHTML = '<span class="feedback-correct">Правильна відповідь!</span>';
+                feedbackContent.innerHTML = `
+                    <p>Ваша відповідь <strong>${question.options[userAnswers[currentQuestion]]}</strong> є правильною!</p>
+                    <div class="explanation">${question.explanation}</div>
+                `;
+            } else {
+                feedbackEmoji.textContent = '❌';
+                feedbackTitle.innerHTML = '<span class="feedback-incorrect">Неправильна відповідь</span>';
+                feedbackContent.innerHTML = `
+                    <p>Ваша відповідь: <strong>${question.options[userAnswers[currentQuestion]]}</strong></p>
+                    <div class="correct-answer">
+                        <strong>Правильна відповідь:</strong> ${question.options[question.answer]}
+                    </div>
+                    <div class="explanation">${question.explanation}</div>
+                `;
+            }
+            
+            feedbackModal.style.display = 'flex';
+        }
+
+        // Продовжити квіз
+        function continueQuiz() {
+            feedbackModal.style.display = 'none';
+            
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // Завершити квіз
+        function finishQuiz() {
+            clearInterval(timer);
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            let message;
+            let emoji;
+            
+            if (percentage >= 80) {
+                message = "Відмінний результат!";
+                emoji = "🏆";
+            } else if (percentage >= 60) {
+                message = "Добре знання матеріалу!";
+                emoji = "👍";
+            } else if (percentage >= 40) {
+                message = "Непогано, але можна краще!";
+                emoji = "🤔";
+            } else {
+                message = "Потрібно підтягнути знання!";
+                emoji = "📚";
+            }
+            
+            document.getElementById('modal-message').innerHTML = `${emoji} ${message}`;
+            document.getElementById('score-message').textContent = `Ви набрали ${score} з ${questions.length} (${percentage}%)`;
+            resultModal.style.display = 'flex';
+            
+            // Зберігаємо результат
+            saveScore(score);
+        }
+
+        // Почати спочатку
+        function restartQuiz() {
+            resultModal.style.display = 'none';
+            startQuiz();
+        }
+
+        // Таймер
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Змінюємо колір, коли час закінчується
+            if (timeLeft <= 30) {
+                timerElement.style.color = 'red';
+            }
+        }
+
+        // Таблиця лідерів
+        function showLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            const scores = JSON.parse(localStorage.getItem('quizScores')) || [];
+            
+            leaderboard.innerHTML = scores.length > 0 
+                ? scores.map((score, index) => `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #444;">
+                        <span>${index + 1}. ${score.name || 'Гравець'}</span>
+                        <span>${score.score} балів</span>
+                    </div>
+                `).join('')
+                : '<p>Ще немає результатів</p>';
+            
+            leaderboardModal.style.display = 'flex';
+            resultModal.style.display = 'none';
+        }
+
+        function closeLeaderboard() {
+            leaderboardModal.style.display = 'none';
+            if (quizContainer.style.display === 'block') {
+                resultModal.style.display = 'flex';
+            }
+        }
+
+        // Зберегти результат
+        function saveScore(score) {
+            const scores = JSON.parse(localStorage.getItem('quizScores')) || [];
+            const playerName = prompt('Введіть ваше ім\'я для таблиці лідерів:', 'Гравець');
+            
+            scores.push({
+                name: playerName || 'Гравець',
+                score: score,
+                date: new Date().toLocaleDateString()
+            });
+            
+            // Сортуємо за балом (за зменшенням)
+            scores.sort((a, b) => b.score - a.score);
+            
+            // Зберігаємо тільки топ-10 результатів
+            localStorage.setItem('quizScores', JSON.stringify(scores.slice(0, 10)));
+        }
+
+        // Темна/світла тема
+        function toggleTheme() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('light-mode', darkMode);
+            localStorage.setItem('darkMode', darkMode);
+            themeToggle.textContent = darkMode ? '🌞' : '🌜';
+        }
+    </script>
+</body>
+</html> 
